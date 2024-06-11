@@ -60,12 +60,18 @@ GROUP_one_3 <- rbind(GROUP2c, GROUP2d)  %>%
 
 
 
-GROUP_one_3_SE<- summarySE(GROUP_one_3, measurevar="average.hierarchy", groupvars=c("step", "geography"), na.rm=FALSE)
+# Calculate percentiles for each step and geography
+GROUP_one_3_percentiles <- GROUP_one_3 %>%
+  group_by(step, geography) %>%
+  summarise(
+    percent25 = quantile(average.hierarchy, probs = 0.25, na.rm = TRUE),
+    percent50 = quantile(average.hierarchy, probs = 0.5, na.rm = TRUE),
+    percent75 = quantile(average.hierarchy, probs = 0.75, na.rm = TRUE) )
 
 GROUP_one_3<-GROUP_one_3 %>% 
   filter(step>0)
-GROUP_one_3_SE<-GROUP_one_3_SE %>% 
-  filter(step>0)
+GROUP_one_3_percentiles <- GROUP_one_3_percentiles %>%
+  filter(step > 0)
 
 
 ## Group4c = random layout, green patches (82, 1599), barren land resources (10), population growth (0.5), village.range (10)
@@ -102,12 +108,19 @@ GROUP_two_3 <- rbind(GROUP4c, GROUP4d)  %>%
 
 
 
-GROUP_two_3_SE<- summarySE(GROUP_two_3, measurevar="average.hierarchy", groupvars=c("step", "geography"), na.rm=FALSE)
+# Calculate percentiles for each step and geography
+GROUP_two_3_percentiles <- GROUP_two_3 %>%
+  group_by(step, geography) %>%
+  summarise(
+    percent25 = quantile(average.hierarchy, probs = 0.25, na.rm = TRUE),
+    percent50 = quantile(average.hierarchy, probs = 0.5, na.rm = TRUE),
+    percent75 = quantile(average.hierarchy, probs = 0.75, na.rm = TRUE) )
 
 GROUP_two_3<-GROUP_two_3 %>% 
   filter(step>0)
-GROUP_two_3_SE<-GROUP_two_3_SE %>% 
-  filter(step>0)
+GROUP_two_3_percentiles <- GROUP_two_3_percentiles %>%
+  filter(step > 0)
+
 
 
 
@@ -119,10 +132,12 @@ GROUP_two_3_SE<-GROUP_two_3_SE %>%
 
 GROUP_one_3_plot <- ggplot(GROUP_one_3, aes(x=step, y=average.hierarchy, color=as.factor(geography)))+
   theme_classic()+
-  geom_errorbar(inherit.aes = FALSE, data = GROUP_one_3_SE, 
-                aes( x=step, ymin=average.hierarchy-se, ymax=average.hierarchy+se, 
-                     color=as.factor(geography)), 
-                width=0, size=1.25)+
+  geom_errorbar(inherit.aes = FALSE, data = GROUP_one_3_percentiles, 
+                aes(x = step, ymin = percent25, ymax = percent75, color = as.factor(geography)), 
+                width = 0, size = 1.25, alpha = 0.5) +
+  # geom_line(data = GROUP_one_3_percentiles, aes(x = step, y = percent25, color = as.factor(geography)), linetype = "dashed") +
+  geom_line(data = GROUP_one_3_percentiles, aes(x = step, y = percent50, color = as.factor(geography)), linetype = "solid") +
+  # geom_line(data = GROUP_one_3_percentiles, aes(x = step, y = percent75, color = as.factor(geography)), linetype = "dashed") +
   geom_point(alpha = 0.03)+
   theme(plot.title=element_text(hjust=0.5,
                                 size=20),
@@ -150,10 +165,12 @@ GROUP_one_3_plot <- ggplot(GROUP_one_3, aes(x=step, y=average.hierarchy, color=a
 
 GROUP_two_3_plot <- ggplot(GROUP_two_3, aes(x=step, y=average.hierarchy, color=as.factor(geography)))+
   theme_classic()+
-  geom_errorbar(inherit.aes = FALSE, data = GROUP_two_3_SE, 
-                aes(x=step, ymin=average.hierarchy-se, ymax=average.hierarchy+se, 
-                    color=as.factor(geography)), 
-                width=0, size=1.25)+
+  geom_errorbar(inherit.aes = FALSE, data = GROUP_two_3_percentiles, 
+                aes(x = step, ymin = percent25, ymax = percent75, color = as.factor(geography)), 
+                width = 0, size = 1.25, alpha = 0.5) +
+  # geom_line(data = GROUP_two_3_percentiles, aes(x = step, y = percent25, color = as.factor(geography)), linetype = "dashed") +
+  geom_line(data = GROUP_two_3_percentiles, aes(x = step, y = percent50, color = as.factor(geography)), linetype = "solid") +
+  #  geom_line(data = GROUP_two_3_percentiles, aes(x = step, y = percent75, color = as.factor(geography)), linetype = "dashed") +
   geom_point(alpha = 0.03)+
   theme(plot.title=element_text(hjust=0.5,
                                 size=20),
@@ -169,7 +186,7 @@ GROUP_two_3_plot <- ggplot(GROUP_two_3, aes(x=step, y=average.hierarchy, color=a
         legend.position=c(0.05,0.9),
         legend.text=element_text(size=12))+
   ylim(0,7)+
-  xlab("/n")+
+  xlab("")+
   ylab("")+
   scale_color_manual(values = safe_colorblind_palette,
                      name="Geographical conditions")+
@@ -182,14 +199,21 @@ GROUP_two_3_plot <- ggplot(GROUP_two_3, aes(x=step, y=average.hierarchy, color=a
 ###### Graphs comparing experienced environmental circumscription ######
 
 
-GROUP_one_3_exp_environ_SE<- summarySE(GROUP_one_3, measurevar="environmental.circumscription", groupvars=c("step", "geography"), na.rm=FALSE)
+GROUP_one_3_exp_environ_percentiles <- GROUP_one_3 %>%
+  group_by(step, geography) %>%
+  summarise(
+    percent25 = quantile(environmental.circumscription, probs = 0.25, na.rm = TRUE),
+    percent50 = quantile(environmental.circumscription, probs = 0.5, na.rm = TRUE),
+    percent75 = quantile(environmental.circumscription, probs = 0.75, na.rm = TRUE) )
 
 GROUP_one_3_exp_environ_plot <- ggplot(GROUP_one_3, aes(x=step, y=environmental.circumscription, color=as.factor(geography)))+
   theme_classic()+
-  geom_errorbar(inherit.aes = FALSE, data = GROUP_one_3_exp_environ_SE, 
-                aes(x=step, ymin=environmental.circumscription-se, ymax=environmental.circumscription+se, 
-                    color=as.factor(geography)), 
-                width=0, size=1.25)+
+  geom_errorbar(inherit.aes = FALSE, data = GROUP_one_3_exp_environ_percentiles, 
+                aes(x = step, ymin = percent25, ymax = percent75, color = as.factor(geography)), 
+                width = 0, size = 1.25, alpha = 0.5) +
+  # geom_line(data = GROUP_one_3_exp_environ_percentiles, aes(x = step, y = percent25, color = as.factor(geography)), linetype = "dashed") +
+  geom_line(data = GROUP_one_3_exp_environ_percentiles, aes(x = step, y = percent50, color = as.factor(geography)), linetype = "solid") +
+  #  geom_line(data = GROUP_one_3_exp_environ_percentiles, aes(x = step, y = percent75, color = as.factor(geography)), linetype = "dashed") +
   geom_point(alpha = 0.03)+
   theme(plot.title=element_text(hjust=0.5,
                                 size=20),
@@ -209,14 +233,23 @@ GROUP_one_3_exp_environ_plot <- ggplot(GROUP_one_3, aes(x=step, y=environmental.
                      name="Geographical conditions")
 
 
-GROUP_two_3_exp_environ_SE<- summarySE(GROUP_two_3, measurevar="environmental.circumscription", groupvars=c("step", "geography"), na.rm=FALSE)
+# Calculate percentiles for each step and geography
+GROUP_two_3_exp_environ_percentiles <- GROUP_two_3 %>%
+  group_by(step, geography) %>%
+  summarise(
+    percent25 = quantile(environmental.circumscription, probs = 0.25, na.rm = TRUE),
+    percent50 = quantile(environmental.circumscription, probs = 0.5, na.rm = TRUE),
+    percent75 = quantile(environmental.circumscription, probs = 0.75, na.rm = TRUE) )
+
 
 GROUP_two_3_exp_environ_plot <- ggplot(GROUP_two_3, aes(x=step, y=environmental.circumscription, color=as.factor(geography)))+
   theme_classic()+
-  geom_errorbar(inherit.aes = FALSE, data = GROUP_two_3_exp_environ_SE, 
-                aes(x=step, ymin=environmental.circumscription-se, ymax=environmental.circumscription+se, 
-                    color=as.factor(geography)), 
-                width=0, size=1.25)+
+  geom_errorbar(inherit.aes = FALSE, data = GROUP_two_3_exp_environ_percentiles, 
+                aes(x = step, ymin = percent25, ymax = percent75, color = as.factor(geography)), 
+                width = 0, size = 1.25, alpha = 0.5) +
+  # geom_line(data = GROUP_two_3_exp_environ_percentiles, aes(x = step, y = percent25, color = as.factor(geography)), linetype = "dashed") +
+  geom_line(data = GROUP_two_3_exp_environ_percentiles, aes(x = step, y = percent50, color = as.factor(geography)), linetype = "solid") +
+  #  geom_line(data = GROUP_two_3_exp_environ_percentiles, aes(x = step, y = percent75, color = as.factor(geography)), linetype = "dashed") +
   geom_point(alpha = 0.03)+
   theme(plot.title=element_text(hjust=0.5,
                                 size=20),
@@ -241,14 +274,23 @@ GROUP_two_3_exp_environ_plot <- ggplot(GROUP_two_3, aes(x=step, y=environmental.
 ###### Graphs comparing experienced social circumscription ######
 
 
-GROUP_one_3_exp_social_SE<- summarySE(GROUP_one_3, measurevar="social.circumscription", groupvars=c("step", "geography"), na.rm=FALSE)
+# Calculate percentiles for each step and geography
+GROUP_one_3_exp_social_percentiles <- GROUP_one_3 %>%
+  group_by(step, geography) %>%
+  summarise(
+    percent25 = quantile(social.circumscription, probs = 0.25, na.rm = TRUE),
+    percent50 = quantile(social.circumscription, probs = 0.5, na.rm = TRUE),
+    percent75 = quantile(social.circumscription, probs = 0.75, na.rm = TRUE) )
+
 
 GROUP_one_3_exp_social_plot <- ggplot(GROUP_one_3, aes(x=step, y=social.circumscription, color=as.factor(geography)))+
   theme_classic()+
-  geom_errorbar(inherit.aes = FALSE, data = GROUP_one_3_exp_social_SE, 
-                aes(x=step, ymin=social.circumscription-se, ymax=social.circumscription+se, 
-                    color=as.factor(geography)), 
-                width=0, size=1.25)+
+  geom_errorbar(inherit.aes = FALSE, data = GROUP_one_3_exp_social_percentiles, 
+                aes(x = step, ymin = percent25, ymax = percent75, color = as.factor(geography)), 
+                width = 0, size = 1.25, alpha = 0.5) +
+  # geom_line(data = GROUP_one_3_exp_social_percentiles, aes(x = step, y = percent25, color = as.factor(geography)), linetype = "dashed") +
+  geom_line(data = GROUP_one_3_exp_social_percentiles, aes(x = step, y = percent50, color = as.factor(geography)), linetype = "solid") +
+  #  geom_line(data = GROUP_one_3_exp_social_percentiles, aes(x = step, y = percent75, color = as.factor(geography)), linetype = "dashed") +
   geom_point(alpha = 0.03)+
   theme(plot.title=element_text(hjust=0.5,
                                 size=20),
@@ -268,14 +310,23 @@ GROUP_one_3_exp_social_plot <- ggplot(GROUP_one_3, aes(x=step, y=social.circumsc
                      name="Geographical conditions")
 
 
-GROUP_two_3_exp_social_SE<- summarySE(GROUP_two_3, measurevar="social.circumscription", groupvars=c("step", "geography"), na.rm=FALSE)
+# Calculate percentiles for each step and geography
+GROUP_two_3_exp_social_percentiles <- GROUP_two_3 %>%
+  group_by(step, geography) %>%
+  summarise(
+    percent25 = quantile(social.circumscription, probs = 0.25, na.rm = TRUE),
+    percent50 = quantile(social.circumscription, probs = 0.5, na.rm = TRUE),
+    percent75 = quantile(social.circumscription, probs = 0.75, na.rm = TRUE) )
+
 
 GROUP_two_3_exp_social_plot <- ggplot(GROUP_two_3, aes(x=step, y=social.circumscription, color=as.factor(geography)))+
   theme_classic()+
-  geom_errorbar(inherit.aes = FALSE, data = GROUP_two_3_exp_social_SE, 
-                aes(x=step, ymin=social.circumscription-se, ymax=social.circumscription+se, 
-                    color=as.factor(geography)), 
-                width=0, size=1.25)+
+  geom_errorbar(inherit.aes = FALSE, data = GROUP_two_3_exp_social_percentiles, 
+                aes(x = step, ymin = percent25, ymax = percent75, color = as.factor(geography)), 
+                width = 0, size = 1.25, alpha = 0.5) +
+  # geom_line(data = GROUP_two_3_exp_social_percentiles, aes(x = step, y = percent25, color = as.factor(geography)), linetype = "dashed") +
+  geom_line(data = GROUP_two_3_exp_social_percentiles, aes(x = step, y = percent50, color = as.factor(geography)), linetype = "solid") +
+  #  geom_line(data = GROUP_two_3_exp_social_percentiles, aes(x = step, y = percent75, color = as.factor(geography)), linetype = "dashed") +
   geom_point(alpha = 0.03)+
   theme(plot.title=element_text(hjust=0.5,
                                 size=20),
@@ -298,14 +349,23 @@ GROUP_two_3_exp_social_plot <- ggplot(GROUP_two_3, aes(x=step, y=social.circumsc
 ###### Graphs comparing population size ######
 
 
-GROUP_one_3_pop_SE<- summarySE(GROUP_one_3, measurevar="count.villages", groupvars=c("step", "geography"), na.rm=FALSE)
+# Calculate percentiles for each step and geography
+GROUP_one_3_pop_percentiles <- GROUP_one_3 %>%
+  group_by(step, geography) %>%
+  summarise(
+    percent25 = quantile(count.villages, probs = 0.25, na.rm = TRUE),
+    percent50 = quantile(count.villages, probs = 0.5, na.rm = TRUE),
+    percent75 = quantile(count.villages, probs = 0.75, na.rm = TRUE) )
+
 
 GROUP_one_3_pop_plot <- ggplot(GROUP_one_3, aes(x=step, y=count.villages, color=as.factor(geography)))+
   theme_classic()+
-  geom_errorbar(inherit.aes = FALSE, data = GROUP_one_3_pop_SE, 
-                aes(x=step, ymin=count.villages-se, ymax=count.villages+se, 
-                    color=as.factor(geography)), 
-                width=0, size=1.25)+
+  geom_errorbar(inherit.aes = FALSE, data = GROUP_one_3_pop_percentiles, 
+                aes(x = step, ymin = percent25, ymax = percent75, color = as.factor(geography)), 
+                width = 0, size = 1.25, alpha = 0.5) +
+  # geom_line(data = GROUP_one_3_pop_percentiles, aes(x = step, y = percent25, color = as.factor(geography)), linetype = "dashed") +
+  geom_line(data = GROUP_one_3_pop_percentiles, aes(x = step, y = percent50, color = as.factor(geography)), linetype = "solid") +
+  #  geom_line(data = GROUP_one_3_pop_percentiles, aes(x = step, y = percent75, color = as.factor(geography)), linetype = "dashed") +
   geom_point(alpha = 0.03)+
   theme(plot.title=element_text(hjust=0.5,
                                 size=20),
@@ -325,14 +385,23 @@ GROUP_one_3_pop_plot <- ggplot(GROUP_one_3, aes(x=step, y=count.villages, color=
                      name="Geographical conditions")
 
 
-GROUP_two_3_pop_SE<- summarySE(GROUP_two_3, measurevar="count.villages", groupvars=c("step", "geography"), na.rm=FALSE)
+# Calculate percentiles for each step and geography
+GROUP_two_3_pop_percentiles <- GROUP_two_3 %>%
+  group_by(step, geography) %>%
+  summarise(
+    percent25 = quantile(count.villages, probs = 0.25, na.rm = TRUE),
+    percent50 = quantile(count.villages, probs = 0.5, na.rm = TRUE),
+    percent75 = quantile(count.villages, probs = 0.75, na.rm = TRUE) )
+
 
 GROUP_two_3_pop_plot <- ggplot(GROUP_two_3, aes(x=step, y=count.villages, color=as.factor(geography)))+
   theme_classic()+
-  geom_errorbar(inherit.aes = FALSE, data = GROUP_two_3_pop_SE, 
-                aes(x=step, ymin=count.villages-se, ymax=count.villages+se, 
-                    color=as.factor(geography)), 
-                width=0, size=1.25)+
+  geom_errorbar(inherit.aes = FALSE, data = GROUP_two_3_pop_percentiles, 
+                aes(x = step, ymin = percent25, ymax = percent75, color = as.factor(geography)), 
+                width = 0, size = 1.25, alpha = 0.5) +
+  # geom_line(data = GROUP_two_3_pop_percentiles, aes(x = step, y = percent25, color = as.factor(geography)), linetype = "dashed") +
+  geom_line(data = GROUP_two_3_pop_percentiles, aes(x = step, y = percent50, color = as.factor(geography)), linetype = "solid") +
+  #  geom_line(data = GROUP_two_3_pop_percentiles, aes(x = step, y = percent75, color = as.factor(geography)), linetype = "dashed") +
   geom_point(alpha = 0.03)+
   theme(plot.title=element_text(hjust=0.5,
                                 size=20),
@@ -368,3 +437,22 @@ ALL_fig_5 <-
         plot.tag = element_text(size = 18))
 ALL_fig_5
 
+
+####################################
+
+###  interquartile range at time step 100
+
+GROUP_one_3_percentiles_step100 <- GROUP_one_3_percentiles %>% 
+  filter(step == 100)
+GROUP_two_3_percentiles_step100 <- GROUP_two_3_percentiles%>% 
+  filter(step == 100)
+
+GROUP_one_exp_environ_percentiles_step100 <- GROUP_one_exp_environ_percentiles%>% 
+  filter(step == 100)
+GROUP_two_exp_environ_percentiles_step100<- GROUP_two_exp_environ_percentiles%>% 
+  filter(step == 100)
+
+GROUP_one_exp_social_percentiles_step100<- GROUP_one_exp_social_percentiles%>% 
+  filter(step == 100)
+GROUP_two_exp_social_percentiles_step100<- GROUP_two_exp_social_percentiles%>% 
+  filter(step == 100)
